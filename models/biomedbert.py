@@ -2,7 +2,6 @@ from transformers import AutoModel, AutoTokenizer
 import torch
 device = torch.device("cpu")  # Force CPU execution
 
-
 class BiomedBERT:
     def __init__(self):
         self.model_name = "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract"
