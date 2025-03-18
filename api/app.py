@@ -3,7 +3,7 @@ from src.ocr import extract_text
 from src.classify import DocumentClassifier
 
 app = FastAPI()
-classifier = DocumentClassifier(model="longformer")  # Change model here
+classifier = DocumentClassifier(model="clinicalbert")  # Change model here
 
 # Pre-populate the classifier with reference documents
 classifier.add_document("This is a prescription for medication.", "prescription")
