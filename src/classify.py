@@ -20,7 +20,7 @@ class DocumentClassifier:
         else:
             raise ValueError("Unsupported model")
 
-        self.index = faiss.IndexFlatL2(768)  # 768 dimensions for BERT-based models
+        self.index = faiss.IndexFlatL2(768)  # gotta remember: 768 dimensions for BERT-based models
         self.doc_embeddings = []
         self.labels = []
 

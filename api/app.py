@@ -3,9 +3,8 @@ from src.ocr import extract_text
 from src.classify import DocumentClassifier
 
 app = FastAPI()
-classifier = DocumentClassifier(model="clinicalbert")  # Change model here
+classifier = DocumentClassifier(model="clinicalbert")  #change model here
 
-# Pre-populate the classifier with reference documents
 classifier.add_document(
     """Patient: John Doe
     DOB: 01/01/1980

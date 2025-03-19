@@ -1,6 +1,6 @@
 from transformers import AutoModel, AutoTokenizer
 import torch
-device = torch.device("cpu")  # Force CPU execution
+device = torch.device("cpu")  #force CPU execution
 
 class BiomedBERT:
     def __init__(self):
