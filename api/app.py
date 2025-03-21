@@ -3,7 +3,7 @@ from src.ocr import extract_text
 from src.classify import DocumentClassifier
 
 app = FastAPI()
-classifier = DocumentClassifier(model="clinicalbert")  #change model here
+classifier = DocumentClassifier(model="clinicalbert")  #gotta change model here
 
 classifier.add_document(
     """Patient: John Doe
