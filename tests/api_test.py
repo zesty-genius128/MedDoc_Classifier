@@ -12,7 +12,7 @@ from thefuzz import process, fuzz
 API_ENDPOINT = "https://ai.bluehive.com/api/v1/completion"
 
 # Your API secret key (keep it secure)
-SECRET_KEY = "BHSK-sandbox-d6TDZyX2PAVq6qL3IdMX8n8sA7bXe8DM_RWOq-8j" # Keep using the sandbox key for now
+SECRET_KEY = "BHSK-sandbox-d6TDZyX2PAVq6qL3IdMX8n8sA7bXe8DM_RWOq-8j" # sandbox key for bluehive
 
 # Headers for the completion API request.
 headers = {
