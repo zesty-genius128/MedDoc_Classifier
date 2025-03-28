@@ -32,7 +32,6 @@ headers = {
 
 if OCR_METHOD == "openai" and OPENAI_API_KEY == "YOUR_OPENAI_API_KEY_HERE":
     print("Warning: OpenAI API Key not set. Please replace 'YOUR_OPENAI_API_KEY_HERE'.")
-    # Optionally exit or prevent OpenAI usage:
     sys.exit("Exiting: OpenAI API Key is required.")
     openai_client = None # Set client to None if key is missing
 else:
