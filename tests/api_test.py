@@ -268,7 +268,7 @@ def get_document_details(ocr_text: str, user_question: str):
 
 def main():
     # Path to your image file
-    image_path = "data/sample_doc.png" 
+    image_path = "data/doc3.png" 
     # User question for BlueHive API
     user_question = (
         "Can you provide the document type and extract details such as the patient's name, "
