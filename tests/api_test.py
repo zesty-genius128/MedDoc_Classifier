@@ -32,9 +32,8 @@ headers = {
 
 if OCR_METHOD == "openai" and OPENAI_API_KEY == "YOUR_OPENAI_API_KEY_HERE":
     print("Warning: OpenAI API Key not set. Please replace 'YOUR_OPENAI_API_KEY_HERE'.")
-    # Optionally exit or prevent OpenAI usage:
     sys.exit("Exiting: OpenAI API Key is required.")
-    openai_client = None # Set client to None if key is missing
+    openai_client = None # set client to None if key is missing
 else:
      try:
         openai_client = openai.OpenAI(api_key=OPENAI_API_KEY)
@@ -269,7 +268,7 @@ def get_document_details(ocr_text: str, user_question: str):
 
 def main():
     # Path to your image file
-    image_path = "data/sample_doc.png" 
+    image_path = "data/doc3.png" 
     # User question for BlueHive API
     user_question = (
         "Can you provide the document type and extract details such as the patient's name, "
