@@ -326,7 +326,7 @@ def main(ocr_method: str, image_path: str):
                  print("Initializing Google Gemini client...")
                  genai.configure(api_key=GOOGLE_API_KEY)
                  # Select the Gemini model (update if needed)
-                 gemini_model = genai.GenerativeModel('gemini-1.5-pro-latest') # Using latest pro model
+                 gemini_model = genai.GenerativeModel('gemini-1.5-pro-latest') 
                  print(f"Using Gemini model: {gemini_model.model_name}")
              except Exception as e:
                  print(f"Failed to initialize Google Gemini client: {e}")
