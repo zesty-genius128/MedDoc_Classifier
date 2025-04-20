@@ -3,7 +3,7 @@ from src.ocr import extract_text
 from src.classify import DocumentClassifier
 
 app = FastAPI()
-classifier = DocumentClassifier(model="clinicalbert")  #gotta change model here
+classifier = DocumentClassifier(model="clinicalbert")  # gotta change model here
 
 classifier.add_document(
     """Patient: John Doe
@@ -12,7 +12,7 @@ classifier.add_document(
     Dosage: Take 1 capsule three times daily for 7 days
     Prescribing Physician: Dr. Jane Smith, ABC Medical Clinic
     Instructions: Take with food. No refills.""",
-    "prescription"
+    "prescription",
 )
 
 classifier.add_document(
@@ -24,7 +24,7 @@ classifier.add_document(
     Billed Amount: $1,200.00
     Approved Amount: $1,100.00
     Notes: Claim submitted for review. Please process for reimbursement.""",
-    "insurance claim"
+    "insurance claim",
 )
 
 
@@ -34,6 +34,8 @@ async def upload_file(file: UploadFile = File(...)):
     category = classifier.classify(text)
     return {"document_type": category}
 
+
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
