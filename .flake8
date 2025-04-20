@@ -4,5 +4,6 @@
 # You might also want to ignore F401, F811 if you confirmed they aren't real issues
 
 # Optional: Instead of ignoring E501, you could increase the allowed line length
-max-line-length = 88 # Black's default - a common choice
+max-line-length = 88 
+# Black's default - a common choice
 # max-line-length = 100 # Or another value you prefer
