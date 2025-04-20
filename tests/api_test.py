@@ -96,10 +96,7 @@ def preprocess_image(image_path: str) -> Union[np.ndarray, None]:
         return thresh  # Return the final preprocessed image data (NumPy array)
     except Exception as e:
         # Wrapped long print statement
-        print(
-            "Error during EasyOCR image preprocessing for "
-            f"'{image_path}': {e}"
-        )
+        print("Error during EasyOCR preprocessing for " f"'{image_path}': {e}")
         return None
 
 
@@ -144,8 +141,7 @@ def encode_image_to_base64(image_path: str) -> Union[str, None]:
                 mime_type = "image/jpeg"
                 # Wrapped long print statement
                 print(
-                    f"Warning: Unknown image type for {image_path}, "
-                    "assuming JPEG."
+                    f"Warning: Unknown type for {image_path}, " "assuming JPEG."
                 )
             base64_image = base64.b64encode(image_bytes).decode("utf-8")
             return f"data:{mime_type};base64,{base64_image}"
@@ -163,7 +159,7 @@ def perform_ocr_openai(image_path: str, client) -> Union[str, None]:
     Accepts the initialized OpenAI client.
     """
     if not client:
-        print("Error: OpenAI client not initialized. Cannot perform OpenAI OCR.")
+        print("Error: OpenAI client not initialized. Can't perform OpenAI OCR.")
         return None
 
     print(f"Encoding image '{image_path}' for OpenAI API...")
@@ -244,9 +240,12 @@ def get_image_parts_for_gemini(image_path: str) -> Union[dict, None]:
         img = Image.open(image_path)
         mime_type = Image.MIME.get(img.format)
         if not mime_type:
-            if img.format == "JPEG": mime_type = "image/jpeg"
-            elif img.format == "PNG": mime_type = "image/png"
-            elif img.format == "WEBP": mime_type = "image/webp"
+            if img.format == "JPEG":
+                mime_type = "image/jpeg"
+            elif img.format == "PNG":
+                mime_type = "image/png"
+            elif img.format == "WEBP":
+                mime_type = "image/webp"
             else:
                 print(f"Error: Unsupported image format for Gemini: {img.format}")
                 return None
@@ -337,9 +336,7 @@ def apply_fuzzy_matching(
             if len(word) < 3 or word.isdigit():
                 corrected_words.append(word)
                 continue
-            best_match, score = process.extractOne(
-                word, dictionary, scorer=fuzz.ratio
-            )
+            best_match, score = process.extractOne(word, dictionary, scorer=fuzz.ratio)
             if score >= threshold and word != best_match:
                 corrected_words.append(best_match)
                 corrections_made += 1
@@ -505,9 +502,7 @@ def main(ocr_method: str, image_path: str):
             print(f"API Error: {result['error']}")
             if "raw_response" in result:
                 # Wrapped potentially long print
-                print(
-                    f"Raw response snippet: {result['raw_response'][:500]}..."
-                )
+                print(f"Raw response snippet: {result['raw_response'][:500]}...")
         else:
             print(json.dumps(result, indent=2))
     else:
@@ -564,11 +559,13 @@ if __name__ == "__main__":
             import easyocr
             import cv2
             import numpy
+
             print("EasyOCR libraries OK.")
         elif selected_method == "openai":
             print("Checking OpenAI libraries...")
             import openai
             import base64
+
             print("OpenAI libraries OK.")
             if not OPENAI_API_KEY:
                 # Wrapped long print statement
@@ -582,6 +579,7 @@ if __name__ == "__main__":
             print("Checking Google Gemini libraries...")
             import google.generativeai as genai
             from PIL import Image
+
             # io already imported at top
             print("Google Gemini libraries OK.")
             if not GOOGLE_API_KEY:
