@@ -12,7 +12,7 @@ class Longformer:
 
     def get_embedding(self, text):
         inputs = self.tokenizer(
-            text,return_tensors="pt",padding=True,truncation=True,max_length=512
+            text, return_tensors="pt", padding=True, truncation=True, max_length=512
         )
         with torch.no_grad():
             outputs = self.model(**inputs)
