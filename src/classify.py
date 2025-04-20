@@ -1,13 +1,13 @@
 import sys
 import os
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
 import faiss
 import numpy as np
+
 from models.biomedbert import BiomedBERT
 from models.clinicalbert import ClinicalBERT
 from models.longformer import Longformer
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
 class DocumentClassifier:
@@ -36,8 +36,8 @@ class DocumentClassifier:
 
     def classify(self, text):
         embedding = self.embedder.get_embedding(text)
-        _, I = self.index.search(np.array([embedding]).astype("float32"), 1)
-        return self.labels[I[0][0]]
+        _, x = self.index.search(np.array([embedding]).astype("float32"), 1)
+        return self.labels[x[0][0]]
 
 
 if __name__ == "__main__":
@@ -60,7 +60,7 @@ if __name__ == "__main__":
         Diagnosis: Lower back pain
         Billed Amount: $1,200.00
         Approved Amount: $1,100.00
-        Notes: Claim submitted for review. Please process for reimbursement.""",
+        Notes: Claim submitted for review.Please process for reimbursement.""",
         "insurance claim",
     )
     print(classifier.classify("A medical prescription."))

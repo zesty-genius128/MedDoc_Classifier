@@ -9,6 +9,7 @@ from thefuzz import process, fuzz
 import base64
 import openai
 import os
+import io  # Moved io import to top
 from typing import Union
 from dotenv import load_dotenv
 import argparse
@@ -87,12 +88,15 @@ def preprocess_image(image_path: str) -> Union[np.ndarray, None]:
             processed_img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
         )
 
+        # Wrapped long print statement
         print(
-            f"Applied preprocessing for EasyOCR: Grayscale, Contrast Adj, Thresholding to {image_path}"
+            "Applied preprocessing for EasyOCR: Grayscale, Contrast Adj, "
+            f"Thresholding to {image_path}"
         )
         return thresh  # Return the final preprocessed image data (NumPy array)
     except Exception as e:
-        print(f"Error during EasyOCR image preprocessing for '{image_path}': {e}")
+        # Wrapped long print statement
+        print("Error during EasyOCR preprocessing for " f"'{image_path}': {e}")
         return None
 
 
@@ -106,7 +110,7 @@ def perform_ocr_easyocr(image_data: np.ndarray) -> Union[str, None]:
 
     try:
         print("Initializing EasyOCR Reader...")
-        # Consider initializing the reader only once if processing many images in a loop
+        # Consider initializing the reader only once
         reader = easyocr.Reader(["en"], gpu=False)
         print("Performing EasyOCR...")
         results = reader.readtext(image_data, detail=0)
@@ -114,7 +118,7 @@ def perform_ocr_easyocr(image_data: np.ndarray) -> Union[str, None]:
         print("EasyOCR successful.")
         return extracted_text
     except Exception as e:
-        print(f"Error during EasyOCR processing: {e}")
+        print(f"Error during EasyOCR processing: {e}")  # Relatively short line
         return None
 
 
@@ -135,7 +139,10 @@ def encode_image_to_base64(image_path: str) -> Union[str, None]:
                 mime_type = "image/webp"
             else:
                 mime_type = "image/jpeg"
-                print(f"Warning: Unknown image type for {image_path}, assuming JPEG.")
+                # Wrapped long print statement
+                print(
+                    f"Warning: Unknown type for {image_path}, " "assuming JPEG."
+                )
             base64_image = base64.b64encode(image_bytes).decode("utf-8")
             return f"data:{mime_type};base64,{base64_image}"
     except FileNotFoundError:
@@ -148,11 +155,11 @@ def encode_image_to_base64(image_path: str) -> Union[str, None]:
 
 def perform_ocr_openai(image_path: str, client) -> Union[str, None]:
     """
-    Uses OpenAI's GPT-4 Vision model to extract text from the given image file.
+    Uses OpenAI's GPT-4 Vision model to extract text from the image file.
     Accepts the initialized OpenAI client.
     """
     if not client:
-        print("Error: OpenAI client not initialized. Cannot perform OpenAI OCR.")
+        print("Error: OpenAI client not initialized. Can't perform OpenAI OCR.")
         return None
 
     print(f"Encoding image '{image_path}' for OpenAI API...")
@@ -161,6 +168,11 @@ def perform_ocr_openai(image_path: str, client) -> Union[str, None]:
         return None
 
     print("Sending request to OpenAI GPT-4 Vision for OCR...")
+    # Wrapped long string in prompt
+    ocr_prompt_text = (
+        "Perform OCR on this image. Extract all text exactly as it appears, "
+        "preserving line breaks and structure where possible."
+    )
     try:
         response = client.chat.completions.create(
             model="gpt-4-turbo",
@@ -168,10 +180,7 @@ def perform_ocr_openai(image_path: str, client) -> Union[str, None]:
                 {
                     "role": "user",
                     "content": [
-                        {
-                            "type": "text",
-                            "text": "Perform OCR on this image. Extract all text exactly as it appears, preserving line breaks and structure where possible.",
-                        },
+                        {"type": "text", "text": ocr_prompt_text},
                         {
                             "type": "image_url",
                             "image_url": {"url": base64_image_data, "detail": "high"},
@@ -193,6 +202,7 @@ def perform_ocr_openai(image_path: str, client) -> Union[str, None]:
                 extracted_text = extracted_text[3:-3].strip()
             return extracted_text
         else:
+            # Wrapped long print statement
             print("Error: OpenAI response did not contain expected text.")
             print(
                 "Response Choice:",
@@ -215,6 +225,7 @@ def perform_ocr_openai(image_path: str, client) -> Union[str, None]:
         print(f"OpenAI Invalid Request Error: {e}")
         return None
     except Exception as e:
+        # Wrapped long print statement
         print(f"An unexpected error occurred during OpenAI OCR: {e}")
         return None
 
@@ -227,10 +238,8 @@ def get_image_parts_for_gemini(image_path: str) -> Union[dict, None]:
     """Reads an image file and prepares it for the Gemini API."""
     try:
         img = Image.open(image_path)
-        # Gemini SDK prefers raw bytes and mime type
         mime_type = Image.MIME.get(img.format)
         if not mime_type:
-            # Fallback for formats PIL doesn't map directly
             if img.format == "JPEG":
                 mime_type = "image/jpeg"
             elif img.format == "PNG":
@@ -240,6 +249,7 @@ def get_image_parts_for_gemini(image_path: str) -> Union[dict, None]:
             else:
                 print(f"Error: Unsupported image format for Gemini: {img.format}")
                 return None
+        # Use io.BytesIO for getting bytes
         img_byte_arr = io.BytesIO()
         img.save(img_byte_arr, format=img.format)
         img_bytes = img_byte_arr.getvalue()
@@ -250,13 +260,14 @@ def get_image_parts_for_gemini(image_path: str) -> Union[dict, None]:
         print(f"Error: Image file not found at '{image_path}'")
         return None
     except Exception as e:
+        # Wrapped long print statement
         print(f"Error reading image for Gemini '{image_path}': {e}")
         return None
 
 
 def perform_ocr_gemini(image_path: str, model) -> Union[str, None]:
     """
-    Uses Google's Gemini Vision model to extract text from the given image file.
+    Uses Google's Gemini Vision model to extract text from the image file.
     Accepts the initialized Gemini model instance.
     """
     if not model:
@@ -268,36 +279,37 @@ def perform_ocr_gemini(image_path: str, model) -> Union[str, None]:
     if not image_parts:
         return None
 
+    # Wrapped long string in prompt
+    ocr_prompt_text = (
+        "Perform OCR on this image. Extract all text exactly as it appears, "
+        "preserving line breaks and structure where possible."
+    )
     prompt_parts = [
-        "Perform OCR on this image. Extract all text exactly as it appears, preserving line breaks and structure where possible.",
+        ocr_prompt_text,
         image_parts,
     ]
 
     print("Sending request to Google Gemini Vision for OCR...")
     try:
-        # Make the API call
         response = model.generate_content(prompt_parts)
 
-        # Basic check for blocked content
         if not response.candidates:
             print("Error: Gemini response was blocked or empty.")
+            # Wrapped potentially long print
             print("Prompt Feedback:", response.prompt_feedback)
             return None
 
-        # Extract text
         extracted_text = "".join(part.text for part in response.parts)
 
         if extracted_text:
             print("Gemini OCR successful.")
-            return extracted_text.strip()  # Return stripped text
+            return extracted_text.strip()
         else:
             print("Warning: Gemini response did not contain extractable text.")
-            # print("Full Response:", response) # Uncomment for debugging
-            return ""  # Return empty string if no text found
+            return ""
 
     except Exception as e:
         print(f"An error occurred during Gemini OCR: {e}")
-        # print(type(e))
         return None
 
 
@@ -354,11 +366,14 @@ def get_document_details(
         "Content-Type": "application/json",
     }
 
+    # Wrapped long f-string in prompt construction
     prompt = (
-        "Below is the OCR text extracted from a medical document (potentially with minor corrections applied):\n\n"
+        "Below is the OCR text extracted from a medical document "
+        "(potentially with minor corrections applied):\n\n"
         f"{ocr_text}\n\n"
-        "Based on the above text, please identify the type of document and extract details "
-        "such as patient information, prescribed medications, prescription date, and any other relevant details.\n"
+        "Based on the above text, please identify the type of document and "
+        "extract details such as patient information, prescribed medications, "
+        "prescription date, and any other relevant details.\n"
         f"User question: {user_question}"
     )
     payload = {
@@ -369,11 +384,12 @@ def get_document_details(
     try:
         response = requests.post(
             BLUEHIVE_API_ENDPOINT, headers=bh_headers, json=payload, timeout=90
-        )  # Increased timeout slightly
+        )
         response.raise_for_status()
         try:
             return response.json()
         except json.JSONDecodeError:
+            # Wrapped long print statement
             print(
                 "Error parsing JSON response from BlueHive. Response text:",
                 response.text,
@@ -394,17 +410,18 @@ def main(ocr_method: str, image_path: str):
     """
     Main pipeline execution function.
     """
+    # Wrapped long user question string
     user_question = (
-        "Can you provide the document type and extract details such as the patient's name, "
-        "medications prescribed, and the prescription date?"
+        "Can you provide the document type and extract details such as the "
+        "patient's name, medications prescribed, and the prescription date?"
     )
 
     print(f"--- Starting Analysis for {image_path} ---")
     print(f"--- Using OCR Method: {ocr_method} ---")
 
     raw_ocr_text = None
-    global openai_client  # Allow modification of global client instance
-    global gemini_model  # Allow modification of global model instance
+    global openai_client
+    global gemini_model
 
     # --- OCR Step ---
     if ocr_method == "easyocr":
@@ -417,7 +434,6 @@ def main(ocr_method: str, image_path: str):
         raw_ocr_text = perform_ocr_easyocr(preprocessed_image_data)
 
     elif ocr_method == "openai":
-        # Initialize client here if not already done (requires key check)
         if not openai_client and OPENAI_API_KEY:
             try:
                 print("Initializing OpenAI client...")
@@ -426,49 +442,37 @@ def main(ocr_method: str, image_path: str):
                 print(f"Failed to initialize OpenAI client: {e}")
                 sys.exit(1)
         elif not OPENAI_API_KEY:
-            # This case should be caught by checks in __main__ but double-check
             print("Error: OpenAI API Key missing, cannot initialize client.")
             sys.exit(1)
-
         print("\nStep 1: Performing OCR using OpenAI GPT-4...")
         raw_ocr_text = perform_ocr_openai(image_path, openai_client)
 
     elif ocr_method == "gemini":
-        # Initialize model here if not already done (requires key check)
         if not gemini_model and GOOGLE_API_KEY:
             try:
                 print("Initializing Google Gemini client...")
                 genai.configure(api_key=GOOGLE_API_KEY)
-                # Select the Gemini model (update if needed)
                 gemini_model = genai.GenerativeModel("gemini-1.5-pro-latest")
                 print(f"Using Gemini model: {gemini_model.model_name}")
             except Exception as e:
                 print(f"Failed to initialize Google Gemini client: {e}")
                 sys.exit(1)
         elif not GOOGLE_API_KEY:
-            # This case should be caught by checks in __main__ but double-check
             print("Error: Google API Key missing, cannot initialize client.")
             sys.exit(1)
-
         print("\nStep 1: Performing OCR using Google Gemini Vision...")
-        # Need to import io for Gemini image handling function
-        global io
-        import io
-
         raw_ocr_text = perform_ocr_gemini(image_path, gemini_model)
 
     else:
-        # This case should be caught by argparse choices, but include for safety
         print(f"Error: Invalid OCR_METHOD configured: '{ocr_method}'")
         sys.exit(1)
 
     # --- Post-OCR Steps (Common to all methods) ---
-    if raw_ocr_text is None:  # Check for None explicitly, as empty string is possible
+    if raw_ocr_text is None:
         print("OCR failed or returned no result. Exiting.")
         sys.exit(1)
-    if not raw_ocr_text:  # Handle empty string case separately if needed
+    if not raw_ocr_text:
         print("Warning: OCR returned empty text.")
-        # Decide if you want to exit or continue with empty text
 
     print("\n--- Raw Extracted OCR text ---")
     print(raw_ocr_text)
@@ -481,7 +485,7 @@ def main(ocr_method: str, image_path: str):
 
     if corrected_ocr_text is None:
         print("Fuzzy matching returned None, using raw OCR text for API call.")
-        corrected_ocr_text = raw_ocr_text  # Fallback to raw text
+        corrected_ocr_text = raw_ocr_text
 
     print("\n--- Corrected OCR text (after fuzzy matching) ---")
     print(corrected_ocr_text)
@@ -490,7 +494,6 @@ def main(ocr_method: str, image_path: str):
     text_to_send = corrected_ocr_text
 
     print("\nStep 3: Sending combined prompt to BlueHive API for document analysis...")
-    # Pass the BlueHive key directly to the function
     result = get_document_details(text_to_send, user_question, SECRET_KEY)
 
     if result:
@@ -498,6 +501,7 @@ def main(ocr_method: str, image_path: str):
         if isinstance(result, dict) and "error" in result:
             print(f"API Error: {result['error']}")
             if "raw_response" in result:
+                # Wrapped potentially long print
                 print(f"Raw response snippet: {result['raw_response'][:500]}...")
         else:
             print(json.dumps(result, indent=2))
@@ -509,10 +513,15 @@ def main(ocr_method: str, image_path: str):
 
 if __name__ == "__main__":
     # --- Argument Parsing ---
+    # Wrapped long description string
     parser = argparse.ArgumentParser(
-        description="Perform OCR on an image using a selected method and analyze with BlueHive API."
+        description=(
+            "Perform OCR on an image using a selected method and analyze "
+            "with BlueHive API."
+        )
     )
     parser.add_argument("image_path", help="Path to the input image file.")
+    # Wrapped long add_argument call
     parser.add_argument(
         "-m",
         "--method",
@@ -536,8 +545,10 @@ if __name__ == "__main__":
         import argparse
     except ImportError as e:
         print(f"Error: Missing core library: {e}")
+        # Wrapped long print statement
         print(
-            "Please install requirements: pip install requests python-levenshtein thefuzz python-dotenv"
+            "Please install requirements: pip install requests "
+            "python-levenshtein thefuzz python-dotenv"
         )
         sys.exit(1)
 
@@ -550,7 +561,6 @@ if __name__ == "__main__":
             import numpy
 
             print("EasyOCR libraries OK.")
-            # No API key needed for EasyOCR
         elif selected_method == "openai":
             print("Checking OpenAI libraries...")
             import openai
@@ -558,8 +568,10 @@ if __name__ == "__main__":
 
             print("OpenAI libraries OK.")
             if not OPENAI_API_KEY:
+                # Wrapped long print statement
                 print(
-                    "\nCRITICAL WARNING: OpenAI API Key (OPENAI_API_KEY) not found in environment variables."
+                    "\nCRITICAL WARNING: OpenAI API Key (OPENAI_API_KEY) "
+                    "not found in environment variables."
                 )
                 sys.exit("Exiting: Required key missing.")
             print("OpenAI API Key found.")
@@ -567,35 +579,37 @@ if __name__ == "__main__":
             print("Checking Google Gemini libraries...")
             import google.generativeai as genai
             from PIL import Image
-            import io  # Need io for Gemini image byte handling
 
+            # io already imported at top
             print("Google Gemini libraries OK.")
             if not GOOGLE_API_KEY:
+                # Wrapped long print statement
                 print(
-                    "\nCRITICAL WARNING: Google API Key (GOOGLE_API_KEY) not found in environment variables."
+                    "\nCRITICAL WARNING: Google API Key (GOOGLE_API_KEY) "
+                    "not found in environment variables."
                 )
                 sys.exit("Exiting: Required key missing.")
             print("Google API Key found.")
 
     except ImportError as e:
+        # Wrapped long print statement
         print(
-            f"\nError: Missing required library for selected OCR_METHOD ('{selected_method}'). {e}"
+            f"\nError: Missing required library for selected "
+            f"OCR_METHOD ('{selected_method}'). {e}"
         )
         print("Please install necessary libraries:")
         print("For 'easyocr': pip install easyocr opencv-python numpy")
         print("For 'openai': pip install openai")
-        print(
-            "For 'gemini': pip install google-generativeai Pillow"
-        )  # Pillow is needed for PIL.Image
+        print("For 'gemini': pip install google-generativeai Pillow")
         sys.exit(1)
 
     # --- Check BlueHive API Key (always needed for final step) ---
     if not SECRET_KEY:
+        # Wrapped long print statement
         print(
-            "\nCRITICAL WARNING: BlueHive API Key (BLUEHIVE_API_KEY) not found in environment variables."
+            "\nCRITICAL WARNING: BlueHive API Key (BLUEHIVE_API_KEY) "
+            "not found in environment variables."
         )
-        # Decide if fallback is acceptable or exit
-        # Using sandbox fallback as example:
         print("Using BlueHive sandbox key as fallback.")
         SECRET_KEY = "BHSK-sandbox-d6TDZyX2PAVq6qL3IdMX8n8sA7bXe8DM_RWOq-8j"
         # Or exit:
