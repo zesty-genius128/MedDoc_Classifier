@@ -9,6 +9,7 @@ from models.biomedbert import BiomedBERT
 from models.clinicalbert import ClinicalBERT
 from models.longformer import Longformer
 
+
 class DocumentClassifier:
     def __init__(self, model="biomedbert"):
         if model == "biomedbert":
@@ -20,7 +21,9 @@ class DocumentClassifier:
         else:
             raise ValueError("Unsupported model")
 
-        self.index = faiss.IndexFlatL2(768)  # gotta remember: 768 dimensions for BERT-based models
+        self.index = faiss.IndexFlatL2(
+            768
+        )  # gotta remember: 768 dimensions for BERT-based models
         self.doc_embeddings = []
         self.labels = []
 
@@ -36,16 +39,17 @@ class DocumentClassifier:
         _, I = self.index.search(np.array([embedding]).astype("float32"), 1)
         return self.labels[I[0][0]]
 
+
 if __name__ == "__main__":
     classifier = DocumentClassifier(model="biomedbert")
     classifier.add_document(
-     """Patient: John Doe
+        """Patient: John Doe
         DOB: 01/01/1980
         Prescription: Amoxicillin 500mg capsules
         Dosage: Take 1 capsule three times daily for 7 days
         Prescribing Physician: Dr. Jane Smith, ABC Medical Clinic
         Instructions: Take with food. No refills.""",
-        "prescription"
+        "prescription",
     )
 
     classifier.add_document(
@@ -57,6 +61,6 @@ if __name__ == "__main__":
         Billed Amount: $1,200.00
         Approved Amount: $1,100.00
         Notes: Claim submitted for review. Please process for reimbursement.""",
-        "insurance claim"
+        "insurance claim",
     )
     print(classifier.classify("A medical prescription."))
