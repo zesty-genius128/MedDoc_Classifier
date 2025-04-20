@@ -1,0 +1,24 @@
+name: Lint Code # Name of the action shown on GitHub
+
+on: [push, pull_request] # When does it run? On pushes and pull requests
+
+jobs:
+  lint: # Name of the job
+    runs-on: ubuntu-latest # What operating system to use
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4 # Action to get your code
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11' # Choose your Python version
+
+      - name: Install linters
+        run: pip install flake8 black # Install the tools
+
+      - name: Run Flake8
+        run: flake8 . --count --show-source --statistics # Check for errors/style
+
+      - name: Run Black Check
+        run: black --check . # Check if code formatting matches Black style
